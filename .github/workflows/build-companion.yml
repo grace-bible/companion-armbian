@@ -1,0 +1,48 @@
+name: Build armbian + companion
+
+on:
+  workflow_dispatch:
+    inputs:
+      armbian-url:
+        type: string
+        description: Armbian FW URL (Ubuntu minimal)
+        default: 'http://xogium.performanceservers.nl/archive/orangepizero2/archive/Armbian_22.11.3_Orangepizero2_jammy_edge_6.1.4_minimal.img.xz'
+
+jobs:
+  pi-img:
+    runs-on: ubuntu-latest
+    name: build image
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - name: install packer
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install -y packer
+
+      - name: build image
+        run: |
+          sudo packer init companion.pkr.hcl
+          sudo packer build companion.pkr.hcl
+
+      - name: compress image
+        shell: bash
+        run: |
+          cd output-companion
+
+          sudo apt-get install -y zerofree
+          device="$(sudo losetup --partscan --show --find armbian-companion.img)"
+          sudo zerofree "${device}p1"
+          sudo losetup --detach "$device"
+
+          sudo gzip -n armbian-companion.img
+
+      - name: Upload Armbian image
+        uses: actions/upload-artifact@v3
+        with:
+          name: Armbian_firmware
+          path: output-companion/armbian-companion-satellite.img.gz
