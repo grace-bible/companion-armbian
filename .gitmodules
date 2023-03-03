@@ -1,0 +1,3 @@
+[submodule "companion-pi"]
+	path = companion-pi
+	url = https://github.com/bitfocus/companion-pi
