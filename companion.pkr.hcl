@@ -73,8 +73,6 @@ build {
 
       # configure git for future updates
       "git config --global pull.rebase false",
-      
-      "mkdir /etc/udev/rules.d/",
 
       # run the update script
       "./update.sh ${var.branch}",
