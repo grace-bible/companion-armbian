@@ -37,6 +37,8 @@ jobs:
         run: |
           sudo packer init companion.pkr.hcl
           sudo packer build -var "url=${{ github.event.inputs.armbian-url }}" -var "branch=${{ github.event.inputs.companion-branch }}" companion.pkr.hcl
+        env:
+          PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: compress image
         shell: bash
