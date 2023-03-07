@@ -52,7 +52,7 @@ jobs:
 
           sudo gzip -n armbian-companion.img
           DATE=$(date +"%d-%m-%y")
-          targetname=armbian-companion-${{ github.event.inputs.companion-branch }}-${{ github.run_number }}-${DATE}.img.gz
+          targetname=armbian-companion-${{ github.event.inputs.companion-branch }}-${DATE}-${{ github.run_id }}.img.gz
           sudo mv armbian-companion.img.gz ${targetname}
 
       - name: Upload Armbian image
