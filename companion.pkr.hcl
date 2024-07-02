@@ -7,7 +7,7 @@ packer {
   }
 }
 
-variable "branch" {
+variable "build" {
   type    = string
   default = "stable"
 }
@@ -49,9 +49,6 @@ build {
       "echo companion > /etc/hostname",
       "sed -i \"s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\tcompanion/g\" /etc/hosts",
 
-      # add a system user
-      "adduser --disabled-password companion --gecos \"\"",
-
       # install some dependencies
       "apt-get update -yq",
       "apt-mark hold openssh-server armbian-bsp-cli-orangepizero2 armbian-config armbian-firmware armbian-zsh",
@@ -66,42 +63,11 @@ build {
     execute_command = "chmod +x {{ .Path }}; {{ .Vars }} su root -c {{ .Path }}"
     inline_shebang  = "/bin/bash -e"
     inline = [
-      # install fnm to manage node version
-      # we do this to /opt/fnm, so that the companion user can use the same installation
-      "export FNM_DIR=/opt/fnm",
-      "echo \"export FNM_DIR=/opt/fnm\" >> /root/.bashrc",
-      "curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /opt/fnm",
-      "export PATH=/opt/fnm:$PATH",
-      "eval \"`fnm env --shell bash`\"",
-
-      # clone the companionpi repository
-      "git clone https://github.com/bitfocus/companion-pi.git -b ${var.pibranch} /usr/local/src/companionpi",
-      "cd /usr/local/src/companionpi",
-
-      # configure git for future updates
-      "git config --global pull.rebase false",
-
-      # run the update script
-      "./update.sh ${var.branch}",
-
-      # install update script dependencies, as they were ignored
-      "yarn --cwd \"/usr/local/src/companionpi/update-prompt\" install",
-
-      # enable start on boot
-      "systemctl enable companion"
-    ]
-  }
-
-  provisioner "shell" {
-    # run as companion user
-    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} su companion -c {{ .Path }}"
-    inline_shebang  = "/bin/bash -e"
-    inline = [
-      # "cd /usr/local/src/companion",
-
-      # add the fnm node to this users path
-      "echo \"export PATH=/opt/fnm/aliases/default/bin:\\$PATH\" >> ~/.bashrc"
-
+      # run the script
+      "export COMPANIONPI_BRANCH=${var.pibranch}",
+      "export COMPANION_BUILD=${var.build}",
+      "chmod +x /tmp/install.sh",
+      "/tmp/install.sh"
     ]
   }
 
