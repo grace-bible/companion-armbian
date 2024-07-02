@@ -44,6 +44,9 @@ build {
       # enable ssh
       # "touch /boot/ssh",
 
+      # Disable first-login script
+      "rm /root/.not_logged_in_yet",
+
       # change the hostname
       "CURRENT_HOSTNAME=`cat /etc/hostname | tr -d \" \t\n\r\"`",
       "echo companion > /etc/hostname",
