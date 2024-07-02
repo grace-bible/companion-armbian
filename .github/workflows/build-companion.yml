@@ -10,7 +10,7 @@ on:
       companion-branch:
         type: choice
         description: Companion branch
-        default: 'master'
+        default: 'stable'
         required: true
         options:
           - stable
