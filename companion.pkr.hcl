@@ -9,7 +9,7 @@ packer {
 
 variable "branch" {
   type    = string
-  default = "beta"
+  default = "stable"
 }
 variable "pibranch" {
   type    = string
