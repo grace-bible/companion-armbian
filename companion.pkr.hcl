@@ -33,6 +33,11 @@ source "arm-image" "companion" {
 build {
   sources = ["source.arm-image.companion"]
 
+  provisioner "file" {
+    source = "companion-pi/install.sh"
+    destination = "/tmp/install.sh"
+  }
+
   provisioner "shell" {
     #system setup
     inline = [
