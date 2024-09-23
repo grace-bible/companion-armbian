@@ -295,7 +295,7 @@ jobs:
       - name: compress image
         shell: bash
         run: |
-          cd output-satellitepi
+          cd output-companion
 
           sudo apt-get install -y zerofree
           device="$(sudo losetup --partscan --show --find armbian-companion.img)"
