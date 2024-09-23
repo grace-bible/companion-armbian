@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     arm-image = {
-      version = "0.2.5"
+      version = "0.2.7"
       source  = "github.com/solo-io/arm-image"
     }
   }
@@ -11,6 +11,7 @@ variable "build" {
   type    = string
   default = "stable"
 }
+
 variable "pibranch" {
   type    = string
   default = "main"
@@ -28,6 +29,8 @@ source "arm-image" "companion" {
   output_filename           = "output-companion/armbian-companion.img"
   qemu_binary               = "qemu-aarch64-static"
   image_mounts              = ["/"]
+  # needed on newer Armbian images for DNS to work for some reason, no resolv-conf option seems to work
+  additional_chroot_mounts  = [["bind", "/run/systemd", "/run/systemd"]]
 }
 
 build {
@@ -41,8 +44,9 @@ build {
   provisioner "shell" {
     #system setup
     inline = [
-      # enable ssh
-      # "touch /boot/ssh",
+      # disable ssh
+      # TODO: This doesn't work for some reason
+      "sudo systemctl disable ssh",
 
       # Disable first-login script
       "rm /root/.not_logged_in_yet",
@@ -51,13 +55,6 @@ build {
       "CURRENT_HOSTNAME=`cat /etc/hostname | tr -d \" \t\n\r\"`",
       "echo companion > /etc/hostname",
       "sed -i \"s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\tcompanion/g\" /etc/hosts",
-
-      # install some dependencies
-      "apt-get update -yq",
-      "apt-mark hold openssh-server armbian-bsp-cli-orangepizero2 armbian-config armbian-firmware armbian-zsh",
-      "apt-get upgrade -yq --option=Dpkg::Options::=--force-confdef",
-      "apt-get install -o Dpkg::Options::=\"--force-confold\" -yqq git unzip curl pkg-config make gcc g++ libusb-1.0-0-dev libudev-dev cmake",
-      "apt-get clean",
     ]
   }
 
@@ -69,6 +66,8 @@ build {
       # run the script
       "export COMPANIONPI_BRANCH=${var.pibranch}",
       "export COMPANION_BUILD=${var.build}",
+      "echo $COMPANIONPI_BRANCH",
+      "echo $COMPANION_BUILD",
       "chmod +x /tmp/install.sh",
       "/tmp/install.sh"
     ]
