@@ -1,5 +1,6 @@
 # companion-armbian
 A build of Companion that uses Armbian to run on several SBC's
+(See also: [companion-satellite-armbian](https://github.com/grace-bible/companion-satellite-armbian))
 
 ## Using this on your own:
 This repo uses Github Actions to build Armbian, and then install Companion. It then saves the resulting image file as an artifact for you to write to an SD card. To do this process on your own:
